@@ -18,6 +18,7 @@ export async function getAdminSession(): Promise<AdminSession | null> {
 
   const decoded = decodeSession(raw);
   if (!decoded) return null;
+  if (!decoded.token) return null; // Prevenir sesiones antiguas que causan 403
   if (decoded.expiresAt < Date.now()) return null;
   return decoded;
 }

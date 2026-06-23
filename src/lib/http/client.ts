@@ -1,5 +1,6 @@
 import { getServerEnv } from "@/lib/env";
 import { HttpError, UnauthorizedError } from "@/lib/http/errors";
+import { getAdminSession } from "@/app/admin/_lib/session";
 
 type HttpMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
 
@@ -33,6 +34,18 @@ export async function http<T>(path: string, options: RequestOptions = {}): Promi
   }
   if (env.apiToken) {
     headers.Authorization = `Bearer ${env.apiToken}`;
+  } else {
+    try {
+      const session = await getAdminSession();
+      if (session?.token) {
+        console.log("Enviando petición a " + url + " CON Token JWT (email: " + session.email + ")");
+        headers.Authorization = `Bearer ${session.token}`;
+      } else {
+        console.log("Enviando petición a " + url + " SIN Token (sesión no tiene token)");
+      }
+    } catch (e) {
+      console.log("Enviando petición a " + url + " SIN Token (Error al leer sesión)");
+    }
   }
 
   let response: Response;

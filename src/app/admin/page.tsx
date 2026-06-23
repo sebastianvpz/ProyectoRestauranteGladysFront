@@ -34,7 +34,7 @@ export default async function AdminHomePage() {
           <CardTitle>Accesos rápidos</CardTitle>
         </CardHeader>
         <CardContent className="flex flex-wrap gap-3">
-          {session.rol === "Administrador" && (
+          {(session.rol === "Administrador" || session.rol === "ADMIN") && (
             <Link
               href="/admin/platos/nuevo"
               className="rounded-full bg-[#C75D3A] px-4 py-2 text-sm font-semibold text-white hover:bg-[#A84D2E]"
