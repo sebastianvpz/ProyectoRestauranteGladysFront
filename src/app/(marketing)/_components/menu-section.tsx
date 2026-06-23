@@ -1,10 +1,10 @@
 import { Container } from "@/components/layout/container";
-import { getFeaturedDishes } from "@/modules/dishes/server";
+import { getDishes } from "@/modules/dishes/server";
 import { DishGrid } from "@/modules/dishes/presentation/dish-grid";
 import { ScrollReveal } from "./scroll-reveal";
 
 export async function MenuSection() {
-  const dishes = await getFeaturedDishes(6);
+  const dishes = await getDishes();
 
   return (
     <section id="menu" className="relative py-32 px-6">
