@@ -1,6 +1,6 @@
 import { Container } from "@/components/layout/container";
 import { getDishes } from "@/modules/dishes/server";
-import { DishGrid } from "@/modules/dishes/presentation/dish-grid";
+import { MenuTabs } from "./menu-tabs";
 import { ScrollReveal } from "./scroll-reveal";
 
 export async function MenuSection() {
@@ -23,10 +23,7 @@ export async function MenuSection() {
           </p>
         </ScrollReveal>
 
-        <DishGrid
-          dishes={dishes}
-          emptyMessage="Pronto publicaremos nuestro menú. ¡Vuelve pronto!"
-        />
+        <MenuTabs dishes={dishes} />
       </Container>
     </section>
   );

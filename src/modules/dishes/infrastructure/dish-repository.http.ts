@@ -33,6 +33,26 @@ function mapToDish(plato: BackendPlato): Dish {
   };
 }
 
+function mapToBackendPlato(draft: Partial<DishDraft & DishUpdate>): any {
+  const reverseCategoryMap: Record<string, number> = {
+    entrada: 2,
+    principal: 1,
+    bebida: 3,
+    postre: 4,
+  };
+  
+  const payload: any = {};
+  if (draft.name !== undefined) payload.nombre = draft.name;
+  if (draft.description !== undefined) payload.descripcion = draft.description;
+  if (draft.price !== undefined) payload.precio = draft.price;
+  if (draft.imageUrl !== undefined) payload.imagenUrl = draft.imageUrl;
+  if (draft.available !== undefined) payload.estado = draft.available ? "Activo" : "Inactivo";
+  if (draft.category !== undefined) {
+    payload.categoria = { idCategoria: reverseCategoryMap[draft.category] || 1 };
+  }
+  return payload;
+}
+
 export const dishRepository = {
   async findAll(): Promise<Dish[]> {
     try {
@@ -59,11 +79,15 @@ export const dishRepository = {
   },
 
   async create(draft: DishDraft): Promise<Dish> {
-    return http<Dish>("/api/platos", { method: "POST", body: draft });
+    const payload = mapToBackendPlato(draft);
+    const plato = await http<BackendPlato>("/api/platos", { method: "POST", body: payload });
+    return mapToDish(plato);
   },
 
   async update(id: string, patch: DishUpdate): Promise<Dish> {
-    return http<Dish>(`/api/platos/${id}`, { method: "PATCH", body: patch });
+    const payload = mapToBackendPlato(patch);
+    const plato = await http<BackendPlato>(`/api/platos/${id}`, { method: "PATCH", body: payload });
+    return mapToDish(plato);
   },
 
   async delete(id: string): Promise<void> {

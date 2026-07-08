@@ -1,6 +1,9 @@
+"use client";
+
 import { formatPrice } from "@/lib/utils/format";
 import { cn } from "@/lib/utils/cn";
 import type { Dish } from "../domain";
+import { useCartStore } from "@/lib/store/cart";
 
 type DishCardProps = {
   dish: Dish;
@@ -10,6 +13,8 @@ type DishCardProps = {
 };
 
 export function DishCard({ dish, variant = "public", className, action }: DishCardProps) {
+  const { addItem } = useCartStore();
+
   if (variant === "admin") {
     return (
       <article
@@ -41,7 +46,10 @@ export function DishCard({ dish, variant = "public", className, action }: DishCa
       <div className="p-6">
         <h3 className="font-display text-2xl font-semibold text-[#2D2013] mb-2">{dish.name}</h3>
         <p className="text-[#8B7355]">{dish.description}</p>
-        <button className="mt-4 w-full bg-[#2D2013] text-white py-3 rounded-full font-medium group-hover:bg-[#C75D3A] transition-colors">
+        <button 
+          onClick={() => addItem(dish)}
+          className="mt-4 w-full bg-[#2D2013] text-white py-3 rounded-full font-medium group-hover:bg-[#C75D3A] transition-colors"
+        >
           Agregar al pedido
         </button>
       </div>
