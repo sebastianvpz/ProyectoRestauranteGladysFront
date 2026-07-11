@@ -16,6 +16,7 @@ const STORE: Order[] = [
     ],
     total: 95,
     status: "pending",
+    isPaid: false,
     source: "whatsapp",
     notes: "Sin ají muy picante por favor",
     createdAt: "2026-06-04T18:30:00.000Z",
@@ -31,6 +32,7 @@ const STORE: Order[] = [
     ],
     total: 38,
     status: "preparing",
+    isPaid: true,
     source: "whatsapp",
     createdAt: "2026-06-04T17:10:00.000Z",
     updatedAt: "2026-06-04T17:35:00.000Z",
@@ -47,6 +49,7 @@ const STORE: Order[] = [
     ],
     total: 98,
     status: "delivered",
+    isPaid: true,
     source: "whatsapp",
     createdAt: "2026-06-03T20:00:00.000Z",
     updatedAt: "2026-06-03T21:15:00.000Z",
@@ -82,6 +85,14 @@ export const mockOrderRepository = {
     const index = STORE.findIndex((o) => o.id === id);
     if (index === -1) throw new Error("Order not found");
     const updated: Order = { ...STORE[index], status, updatedAt: NOW() };
+    STORE[index] = updated;
+    return clone(updated);
+  },
+
+  async registerPayment(id: string): Promise<Order> {
+    const index = STORE.findIndex((o) => o.id === id);
+    if (index === -1) throw new Error("Order not found");
+    const updated: Order = { ...STORE[index], status: "preparing", isPaid: true, updatedAt: NOW() };
     STORE[index] = updated;
     return clone(updated);
   },

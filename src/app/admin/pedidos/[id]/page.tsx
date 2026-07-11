@@ -5,6 +5,9 @@ import { getOrder } from "@/modules/orders/server";
 import { OrderStatusBadge } from "@/modules/orders/presentation/order-status-badge";
 import { OrderStatusSelect } from "@/modules/orders/presentation/order-status-select";
 import { WhatsAppButton } from "@/modules/orders/presentation/whatsapp-button";
+import { RegisterPaymentButton } from "@/modules/orders/presentation/register-payment-button";
+import { CancelOrderButton } from "@/modules/orders/presentation/cancel-order-button";
+import { InvoiceButton } from "@/modules/orders/presentation/invoice-button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatDateTime, formatPhone, formatPrice } from "@/lib/utils/format";
 
@@ -45,7 +48,12 @@ export default async function OrderDetailPage({ params }: { params: Params }) {
           </p>
         </div>
         <div className="flex flex-col items-end gap-2">
-          <OrderStatusBadge status={order.status} />
+          <div className="flex items-center gap-2">
+            <InvoiceButton orderId={order.id} isPaid={order.isPaid} token={session.token} />
+            <CancelOrderButton orderId={order.id} currentStatus={order.status} />
+            <RegisterPaymentButton orderId={order.id} isPaid={order.isPaid} />
+            <OrderStatusBadge status={order.status} />
+          </div>
           <OrderStatusSelect orderId={order.id} current={order.status} />
           <WhatsAppButton order={order} />
         </div>

@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getAdminSession } from "./_lib/session";
 import { getDishes } from "@/modules/dishes/server";
 import { getOrders } from "@/modules/orders/server";
+import { SalesChart } from "./_components/sales-chart";
 
 export const metadata = { title: "Panel" };
 
@@ -48,6 +49,15 @@ export default async function AdminHomePage() {
           >
             Ver pedidos
           </Link>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Reporte de Ventas</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <SalesChart token={session.token} />
         </CardContent>
       </Card>
     </div>

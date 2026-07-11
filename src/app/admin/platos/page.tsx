@@ -21,6 +21,10 @@ export default async function DishesPage() {
   const session = await getAdminSession();
   if (!session) redirect("/admin/login");
 
+  if (session.rol !== "Administrador" && session.rol !== "ADMIN") {
+    redirect("/admin");
+  }
+
   const dishes = await getDishes();
 
   return (

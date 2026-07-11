@@ -5,16 +5,20 @@ import Link from "next/link";
 import { cn } from "@/lib/utils/cn";
 
 const ITEMS = [
-  { href: "/admin", label: "Resumen", exact: true },
-  { href: "/admin/platos", label: "Platos" },
-  { href: "/admin/pedidos", label: "Pedidos" },
+  { href: "/admin", label: "Resumen", exact: true, roles: ["ADMIN", "Administrador"] },
+  { href: "/admin/platos", label: "Platos", roles: ["ADMIN", "Administrador"] },
+  { href: "/admin/pedidos", label: "Pedidos", roles: ["ADMIN", "Administrador", "Empleado", "EMPLEADO"] },
+  { href: "/admin/clientes", label: "Clientes", roles: ["ADMIN", "Administrador"] },
+  { href: "/admin/cocina", label: "Cocina", roles: ["ADMIN", "Administrador", "Cocinero", "COCINERO"] },
+  { href: "/admin/comprobantes", label: "Comprobantes", roles: ["ADMIN", "Administrador"] },
+  { href: "/admin/configuracion", label: "Configuración", roles: ["ADMIN", "Administrador"] },
 ];
 
-export function AdminNavLinks() {
+export function AdminNavLinks({ userRole }: { userRole: string }) {
   const pathname = usePathname();
   return (
     <nav className="flex flex-col gap-1">
-      {ITEMS.map((item) => {
+      {ITEMS.filter(item => item.roles.includes(userRole)).map((item) => {
         const isActive = item.exact ? pathname === item.href : pathname.startsWith(item.href);
         return (
           <Link

@@ -24,6 +24,13 @@ export default async function OrdersPage({ searchParams }: { searchParams: Searc
   const session = await getAdminSession();
   if (!session) redirect("/admin/login");
 
+  const isAdmin = session.rol === "ADMIN" || session.rol === "Administrador";
+  const isEmpleado = session.rol === "EMPLEADO" || session.rol === "Empleado";
+  
+  if (!isAdmin && !isEmpleado) {
+    redirect("/admin");
+  }
+
   const params = await searchParams;
   const filter: GetOrdersFilter = {
     status: isOrderStatus(params.status) ? params.status : undefined,
@@ -103,8 +110,15 @@ export default async function OrdersPage({ searchParams }: { searchParams: Searc
                     <div className="font-medium text-[#2D2013]">{order.customerName}</div>
                     <div className="text-xs text-[#8B7355]">{formatPhone(order.customerPhone)}</div>
                   </TableCell>
-                  <TableCell className="font-semibold text-[#2D2013]">
-                    {formatPrice(order.total)}
+                  <TableCell>
+                    <div className="font-semibold text-[#2D2013]">
+                      {formatPrice(order.total)}
+                    </div>
+                    {order.isPaid ? (
+                      <span className="text-xs font-semibold text-green-600">Pagado</span>
+                    ) : (
+                      <span className="text-xs font-semibold text-orange-500">Por pagar</span>
+                    )}
                   </TableCell>
                   <TableCell>
                     <div className="space-y-2">

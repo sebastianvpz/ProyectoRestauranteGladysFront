@@ -28,6 +28,7 @@ export const orderSchema = z.object({
   items: z.array(orderItemSchema).min(1),
   total: z.number().nonnegative(),
   status: orderStatusSchema,
+  isPaid: z.boolean(),
   source: z.enum(["whatsapp", "web", "phone"]).default("whatsapp"),
   notes: z.string().optional(),
   createdAt: z.string(),

@@ -7,6 +7,7 @@ type BackendPedido = {
   cliente: { nombre: string; celular: string };
   fechaHora: string;
   estado: string;
+  pagado: boolean;
   total: number;
   direccionEntrega?: string;
   detalles: Array<{
@@ -20,6 +21,7 @@ type BackendPedido = {
 function mapToOrder(pedido: BackendPedido): Order {
   const statusMap: Record<string, any> = {
     "PENDIENTE": "pending",
+    "CONFIRMADO": "confirmed",
     "PREPARANDO": "preparing",
     "LISTO": "ready",
     "ENTREGADO": "delivered",
@@ -42,6 +44,7 @@ function mapToOrder(pedido: BackendPedido): Order {
     })),
     total: pedido.total,
     status: mappedStatus,
+    isPaid: Boolean(pedido.pagado),
     source: "whatsapp", // por defecto
     createdAt: pedido.fechaHora,
     updatedAt: pedido.fechaHora,
@@ -82,6 +85,7 @@ export const orderRepository = {
   async updateStatus(id: string, status: OrderStatus): Promise<Order> {
     const statusMapInvertido: Record<string, string> = {
       "pending": "PENDIENTE",
+      "confirmed": "CONFIRMADO",
       "preparing": "PREPARANDO",
       "ready": "LISTO",
       "delivered": "ENTREGADO",
@@ -99,4 +103,14 @@ export const orderRepository = {
     if (!updated) throw new Error("Order not found after update");
     return updated;
   },
+
+  async registerPayment(id: string): Promise<Order> {
+    await http<string>(`/api/admin/pedidos/${id}/pago`, {
+      method: "PUT",
+    });
+    
+    const updated = await this.findById(id);
+    if (!updated) throw new Error("Order not found after payment");
+    return updated;
+  }
 };

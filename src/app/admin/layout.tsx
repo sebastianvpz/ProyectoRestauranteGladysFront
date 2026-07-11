@@ -42,7 +42,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
               <p className="mb-3 px-3 text-xs font-semibold uppercase tracking-wider text-[#8B7355]">
                 Panel
               </p>
-              <AdminNavLinks />
+              <AdminNavLinks userRole={session.rol} />
             </aside>
             <main className="min-w-0">{children}</main>
           </div>

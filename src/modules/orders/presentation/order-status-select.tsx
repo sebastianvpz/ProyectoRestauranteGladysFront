@@ -17,7 +17,7 @@ export function OrderStatusSelect({ orderId, current, className }: OrderStatusSe
   return (
     <select
       aria-label="Cambiar estado del pedido"
-      defaultValue={current}
+      value={current}
       disabled={isPending}
       onChange={(event) => {
         const value = event.target.value as OrderStatus;

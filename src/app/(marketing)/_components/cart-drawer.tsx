@@ -4,12 +4,20 @@ import { useState, useEffect } from "react";
 import { ShoppingCart, X, Plus, Minus, Trash2, Send, MapPin } from "lucide-react";
 import { useCartStore } from "@/lib/store/cart";
 import { formatPrice } from "@/lib/utils/format";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 
 export function CartDrawer() {
   const [isOpen, setIsOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [isCheckingOut, setIsCheckingOut] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [alertInfo, setAlertInfo] = useState<{show: boolean, msg: string, type: "success" | "warning" | "danger"}>({show: false, msg: "", type: "warning"});
+
+  // Cupones
+  const [couponCode, setCouponCode] = useState("");
+  const [discountPercent, setDiscountPercent] = useState(0);
+  const [couponError, setCouponError] = useState("");
+  const [couponId, setCouponId] = useState<number | null>(null);
 
   // Datos del cliente
   const [customerInfo, setCustomerInfo] = useState({
@@ -22,28 +30,72 @@ export function CartDrawer() {
 
   const handleGetLocation = () => {
     if (!navigator.geolocation) {
-      alert("Tu navegador no soporta geolocalización.");
+      setAlertInfo({show: true, msg: "Tu navegador no soporta geolocalización.", type: "warning"});
       return;
     }
     
     navigator.geolocation.getCurrentPosition(
-      (position) => {
+      (async (position) => {
+        const lat = position.coords.latitude.toString();
+        const lon = position.coords.longitude.toString();
+        
+        // Reverse Geocoding usando Nominatim
+        let address = "";
+        try {
+          const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`);
+          const data = await res.json();
+          if (data && data.display_name) {
+            address = data.display_name;
+          }
+        } catch (e) {
+          console.error("Error reverse geocoding", e);
+        }
+
         setCustomerInfo(prev => ({
           ...prev,
-          latitud: position.coords.latitude.toString(),
-          longitud: position.coords.longitude.toString(),
+          latitud: lat,
+          longitud: lon,
+          direccion: address || prev.direccion, // Si falla la API, conserva lo que tenía
         }));
         // Opcional: mostrar un mensajito de éxito
-        alert("¡Ubicación obtenida exitosamente!");
-      },
+        setAlertInfo({
+          show: true, 
+          msg: address ? "¡Ubicación y dirección obtenidas exitosamente!" : "¡Ubicación obtenida! Escribe tu dirección manual.", 
+          type: "success"
+        });
+      }),
       (error) => {
-        alert("No pudimos obtener tu ubicación. Por favor permite el acceso al GPS.");
+        setAlertInfo({show: true, msg: "No pudimos obtener tu ubicación. Por favor permite el acceso al GPS.", type: "danger"});
         console.error(error);
       }
     );
   };
 
   const { items, removeItem, updateQuantity, getTotal, clearCart } = useCartStore();
+
+  const originalTotal = getTotal();
+  const discountAmount = (originalTotal * discountPercent) / 100;
+  const finalTotal = originalTotal - discountAmount;
+
+  const handleValidateCoupon = async () => {
+    if (!couponCode) return;
+    setCouponError("");
+    try {
+      const res = await fetch(`http://localhost:8080/api/cupones/validar?codigo=${couponCode}`);
+      const data = await res.json();
+      if (data.valido) {
+        setDiscountPercent(data.porcentajeDescuento);
+        setCouponId(data.idCupon);
+        setCouponError("");
+      } else {
+        setDiscountPercent(0);
+        setCouponId(null);
+        setCouponError(data.mensaje);
+      }
+    } catch (e) {
+      setCouponError("Error al validar cupón");
+    }
+  };
 
   useEffect(() => {
     const timeout = setTimeout(() => {
@@ -72,7 +124,8 @@ export function CartDrawer() {
         direccionEntrega: customerInfo.direccion,
         latitud: customerInfo.latitud,
         longitud: customerInfo.longitud,
-        total: getTotal(),
+        cupon: couponId ? { idCupon: couponId } : null,
+        total: finalTotal,
         estado: "Pendiente",
         detalles: items.map(item => ({
           plato: { idPlato: Number(item.dish.id) },
@@ -82,11 +135,18 @@ export function CartDrawer() {
         }))
       };
 
-      await fetch("http://localhost:8080/api/pedidos", {
+      const res = await fetch("http://localhost:8080/api/pedidos", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(pedidoPayload),
-      }).catch(err => console.warn("Error guardando en backend:", err));
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => null);
+        setAlertInfo({show: true, msg: errorData?.error || "Error al procesar el pedido. Intente nuevamente.", type: "danger"});
+        setIsSubmitting(false);
+        return; // Bloquea continuar hacia WhatsApp
+      }
 
       // 2. Redirigir a WhatsApp
       let message = `¡Hola Restaurante Gladys! Acabo de registrar mi pedido en la web.\n\n`;
@@ -103,7 +163,11 @@ export function CartDrawer() {
         message += `- ${item.quantity}x ${item.dish.name} (${formatPrice(item.dish.price * item.quantity)})\n`;
       });
       
-      message += `\n*Total a pagar: ${formatPrice(getTotal())}*\n\n¡Quedo a la espera de la confirmación!`;
+      message += `\n*Subtotal: ${formatPrice(originalTotal)}*\n`;
+      if (discountPercent > 0) {
+        message += `*Descuento (${discountPercent}%): -${formatPrice(discountAmount)}*\n`;
+      }
+      message += `*Total a pagar: ${formatPrice(finalTotal)}*\n\n¡Quedo a la espera de la confirmación!`;
 
       const phoneNumber = "51991501787";
       const encodedMessage = encodeURIComponent(message);
@@ -231,6 +295,33 @@ export function CartDrawer() {
                   </p>
                 )}
               </div>
+              
+              {/* Cupón */}
+              <div className="pt-2 border-t border-gray-100">
+                <label className="block text-sm font-medium text-[#2D2013] mb-1">¿Tienes un cupón?</label>
+                <div className="flex gap-2">
+                  <input 
+                    type="text" 
+                    value={couponCode}
+                    onChange={e => setCouponCode(e.target.value.toUpperCase())}
+                    className="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm uppercase focus:border-[#C75D3A] focus:ring-1 focus:ring-[#C75D3A] outline-none"
+                    placeholder="Ej. PROMO20"
+                    disabled={discountPercent > 0}
+                  />
+                  {discountPercent > 0 ? (
+                    <button type="button" onClick={() => { setDiscountPercent(0); setCouponCode(""); setCouponId(null); }} className="px-3 py-2 bg-red-100 text-red-600 rounded-lg text-sm font-semibold hover:bg-red-200">
+                      Quitar
+                    </button>
+                  ) : (
+                    <button type="button" onClick={handleValidateCoupon} className="px-3 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm font-semibold hover:bg-gray-200">
+                      Aplicar
+                    </button>
+                  )}
+                </div>
+                {couponError && <p className="text-xs text-red-500 mt-1">{couponError}</p>}
+                {discountPercent > 0 && <p className="text-xs text-green-600 mt-1">¡Cupón de {discountPercent}% aplicado!</p>}
+              </div>
+
               <button
                 type="button"
                 onClick={() => setIsCheckingOut(false)}
@@ -286,11 +377,23 @@ export function CartDrawer() {
         {/* Footer (Total y Botón WhatsApp) */}
         {items.length > 0 && (
           <div className="border-t border-[#D4A853]/20 bg-gray-50 p-6">
-            <div className="flex items-center justify-between mb-4">
-              <span className="text-[#8B7355] font-medium">Total estimado</span>
-              <span className="font-display text-2xl font-bold text-[#2D2013]">
-                {formatPrice(getTotal())}
-              </span>
+            <div className="flex flex-col gap-1 mb-4">
+              <div className="flex items-center justify-between">
+                <span className="text-[#8B7355] font-medium text-sm">Subtotal</span>
+                <span className="font-semibold text-gray-700">{formatPrice(originalTotal)}</span>
+              </div>
+              {discountPercent > 0 && (
+                <div className="flex items-center justify-between text-green-600">
+                  <span className="font-medium text-sm">Descuento ({discountPercent}%)</span>
+                  <span className="font-semibold">-{formatPrice(discountAmount)}</span>
+                </div>
+              )}
+              <div className="flex items-center justify-between border-t border-gray-200 pt-2 mt-1">
+                <span className="text-[#2D2013] font-bold">Total a pagar</span>
+                <span className="font-display text-2xl font-bold text-[#C75D3A]">
+                  {formatPrice(finalTotal)}
+                </span>
+              </div>
             </div>
             {isCheckingOut ? (
               <button
@@ -325,6 +428,15 @@ export function CartDrawer() {
           </div>
         )}
       </div>
+
+      <ConfirmDialog
+        isOpen={alertInfo.show}
+        onClose={() => setAlertInfo({show: false, msg: "", type: "warning"})}
+        title="Atención"
+        message={alertInfo.msg}
+        type={alertInfo.type}
+        isAlert={true}
+      />
     </>
   );
 }
