@@ -43,6 +43,11 @@ export function AboutSection() {
             <div className="relative">
               <div className="absolute -inset-4 bg-gradient-to-br from-[#C75D3A] to-[#D4A853] rounded-3xl transform rotate-3" />
               <div className="relative bg-[#3D3023] rounded-3xl aspect-[4/5] flex items-center justify-center overflow-hidden">
+                <img 
+                  src="https://media.istockphoto.com/id/500674888/es/foto/senior-mujer-hornear.jpg?s=612x612&w=0&k=20&c=OREFQF0uvppKeQOs8h_2jfO7OmGoPkVOZ2RYfzBjOng="
+                  alt="Gladys Huamaní"
+                  className="absolute inset-0 w-full h-full object-cover opacity-80 mix-blend-overlay"
+                />
                 <div className="absolute inset-0 bg-gradient-to-t from-[#2D2013] to-transparent" />
                 <div className="absolute bottom-0 left-0 right-0 p-8">
                   <p className="font-display text-3xl text-[#FDF8F3] italic">

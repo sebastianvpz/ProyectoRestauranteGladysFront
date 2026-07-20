@@ -11,7 +11,7 @@ export function KitchenKanban({ orders }: { orders: Order[] }) {
   const router = useRouter();
   const [loadingId, setLoadingId] = useState<string | null>(null);
 
-  const pendingOrders = orders.filter(o => o.status === "pending" && o.isPaid); // Solo pagados pasan a cocina si es estricto, o todos. Asumamos que todos los pagados y pendientes van a cocina. Wait, maybe just pending?
+  const pendingOrders = orders.filter(o => o.status === "confirmed" || (o.status === "pending" && o.isPaid));
   const preparingOrders = orders.filter(o => o.status === "preparing");
 
   const changeStatus = async (id: string, newStatus: string) => {

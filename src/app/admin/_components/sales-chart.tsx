@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import * as XLSX from "xlsx";
 import jsPDF from "jspdf";
-import "jspdf-autotable";
+import autoTable from "jspdf-autotable";
 import { Download } from "lucide-react";
 import { formatPrice } from "@/lib/utils/format";
 
@@ -79,7 +79,7 @@ export function SalesChart({ token }: { token: string }) {
       formatPrice(p.total)
     ]);
 
-    (doc as any).autoTable({
+    autoTable(doc, {
       head: [tableColumn],
       body: tableRows,
       startY: 20,

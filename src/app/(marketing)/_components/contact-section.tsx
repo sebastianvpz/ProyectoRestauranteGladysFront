@@ -7,7 +7,7 @@ export function ContactSection() {
   return (
     <section id="contacto" className="py-32 px-6 bg-[#F5EDE3]">
       <Container size="lg">
-        <div className="grid md:grid-cols-2 gap-16">
+        <div className="max-w-xl mx-auto">
           <ScrollReveal className="contact-info" id="contact-info">
             <span className="text-[#C75D3A] text-sm font-medium tracking-wider uppercase">
               Encuéntranos
@@ -48,43 +48,7 @@ export function ContactSection() {
             </div>
           </ScrollReveal>
 
-          <ScrollReveal className="contact-form" id="contact-form">
-            <div className="bg-white rounded-3xl p-8 shadow-xl">
-              <h3 className="font-display text-2xl font-semibold text-[#2D2013] mb-6">
-                Haz tu reservación
-              </h3>
-              <form className="space-y-4">
-                <Field label="Nombre" placeholder="Tu nombre" />
-                <Field label="Teléfono" placeholder="+51 987 654 321" type="tel" />
-                <div className="grid grid-cols-2 gap-4">
-                  <Field label="Fecha" type="date" />
-                  <div>
-                    <label className="block text-[#8B7355] text-sm mb-2">Personas</label>
-                    <select className="w-full px-4 py-3 rounded-xl border border-[#D4A853]/30 focus:border-[#C75D3A] focus:ring-2 focus:ring-[#C75D3A]/20 outline-none transition-all bg-white">
-                      <option>2 personas</option>
-                      <option>4 personas</option>
-                      <option>6 personas</option>
-                      <option>8+ personas</option>
-                    </select>
-                  </div>
-                </div>
-                <div>
-                  <label className="block text-[#8B7355] text-sm mb-2">Mensaje (opcional)</label>
-                  <textarea
-                    rows={3}
-                    className="w-full px-4 py-3 rounded-xl border border-[#D4A853]/30 focus:border-[#C75D3A] focus:ring-2 focus:ring-[#C75D3A]/20 outline-none transition-all resize-none"
-                    placeholder="Comentarios adicionales..."
-                  />
-                </div>
-                <button
-                  type="submit"
-                  className="w-full bg-[#C75D3A] text-white py-4 rounded-full font-semibold text-lg hover:bg-[#A84D2E] transition-colors"
-                >
-                  Reservar Mesa
-                </button>
-              </form>
-            </div>
-          </ScrollReveal>
+
         </div>
       </Container>
     </section>
@@ -117,17 +81,3 @@ function ContactItem({
   );
 }
 
-function Field({
-  label,
-  ...input
-}: { label: string } & React.InputHTMLAttributes<HTMLInputElement>) {
-  return (
-    <div>
-      <label className="block text-[#8B7355] text-sm mb-2">{label}</label>
-      <input
-        {...input}
-        className="w-full px-4 py-3 rounded-xl border border-[#D4A853]/30 focus:border-[#C75D3A] focus:ring-2 focus:ring-[#C75D3A]/20 outline-none transition-all"
-      />
-    </div>
-  );
-}

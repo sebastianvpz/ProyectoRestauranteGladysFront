@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils/cn";
 const ITEMS = [
   { href: "/admin", label: "Resumen", exact: true, roles: ["ADMIN", "Administrador"] },
   { href: "/admin/platos", label: "Platos", roles: ["ADMIN", "Administrador"] },
+  { href: "/admin/categorias", label: "Categorías", roles: ["ADMIN", "Administrador"] },
   { href: "/admin/pedidos", label: "Pedidos", roles: ["ADMIN", "Administrador", "Empleado", "EMPLEADO"] },
   { href: "/admin/clientes", label: "Clientes", roles: ["ADMIN", "Administrador"] },
   { href: "/admin/cocina", label: "Cocina", roles: ["ADMIN", "Administrador", "Cocinero", "COCINERO"] },

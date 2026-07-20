@@ -35,12 +35,6 @@ export function HeroSection() {
           >
             Ver Menú
           </a>
-          <a
-            href="#contacto"
-            className="border-2 border-[#2D2013] text-[#2D2013] px-8 py-4 rounded-full font-semibold text-lg hover:bg-[#2D2013] hover:text-[#FDF8F3] transition-all"
-          >
-            Reservaciones
-          </a>
         </div>
 
         <div className="animate-fade-in-up opacity-0 animation-delay-400 mt-16 flex items-center justify-center gap-2">
